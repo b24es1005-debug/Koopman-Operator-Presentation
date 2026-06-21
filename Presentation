@@ -1,0 +1,1028 @@
+\documentclass{beamer}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usetheme{Madrid}
+
+\definecolor{koopblue}{RGB}{0,84,159}
+\definecolor{koopgreen}{RGB}{0,128,80}
+\definecolor{koopcoral}{RGB}{200,60,40}
+\definecolor{koopamber}{RGB}{180,120,0}
+
+\title{Koopman Operator Analysis of Nonlinear Dynamical Systems}
+\author{B.Tech Project Presentation}
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+% ============================================================
+%  SECTION 1 — MOTIVATION
+% ============================================================
+
+\begin{frame}{Basic Introduction}
+Nonlinear dynamical systems appear in many physical systems such as:
+\begin{itemize}
+  \item Planetary motion
+  \item Fluid dynamics
+  \item Robotics
+  \item Control systems
+\end{itemize}
+\vspace{0.3cm}
+Traditional analysis is difficult because nonlinear systems cannot usually be solved analytically.
+
+\vspace{0.3cm}
+Koopman operator theory provides a way to analyze nonlinear systems using linear techniques.
+\end{frame}
+
+\begin{frame}{Linear System and Its Conditions}
+\textbf{Linear system:} A system where the output changes in a perfectly proportional and predictable way with respect to the input.
+
+\vspace{0.4cm}
+A linear system behaves in a straightforward, proportional, and additive manner.
+
+\vspace{0.4cm}
+A linear system will always follow two laws:
+\begin{enumerate}
+  \item Law of Homogeneity
+  \item Law of Additivity
+\end{enumerate}
+
+\vspace{0.3cm}
+A Nonlinear system will not follow either of the above conditions.\\
+Most real-world systems are Nonlinear due to their unpredictable nature.
+\end{frame}
+
+\begin{frame}{Laws of Linear Systems}
+\textbf{1) Law of Homogeneity:}\\
+If an input is multiplied by a constant, the output must also be multiplied by the same constant.
+\[
+  T(ax) = a\,T(x) \quad \forall\; \text{scalar } a
+\]
+
+\vspace{0.5cm}
+\textbf{2) Law of Additivity:}\\
+If two inputs are applied separately and produce two outputs, then applying both inputs together should produce the sum of those outputs.
+\[
+  T(x_1 + x_2) = T(x_1) + T(x_2)
+\]
+\end{frame}
+
+\begin{frame}{Problem With Nonlinear Systems}
+\textbf{Linear systems:}
+\[
+  \dot{x} = Ax
+\]
+\textbf{Closed-form solution:}
+\[
+  x(t) = e^{At}x_0
+\]
+
+\vspace{0.4cm}
+Nonlinear systems generally do not have closed-form solutions.
+
+\vspace{0.3cm}
+\textbf{Why?} The $\sin(\theta)$ term in the pendulum, or $x_1 x_2$ cross-terms, cannot be solved by matrix exponentials alone.
+
+\vspace{0.3cm}
+Therefore new analysis tools are required.
+\end{frame}
+
+% ============================================================
+%  SECTION 2 — KOOPMAN OPERATOR CONCEPT
+% ============================================================
+
+\begin{frame}{Koopman Operator Concept}
+Instead of studying the state $x$ directly, Koopman theory studies \textbf{functions of the state}.
+
+\vspace{0.3cm}
+Define an \textbf{observable} (measurement function):
+\[
+  g : \mathbb{R}^n \to \mathbb{R}, \quad g = g(x)
+\]
+
+\vspace{0.3cm}
+Example observables:
+\begin{itemize}
+  \item $g(x) = x_1$ \hfill (identity — the state itself)
+  \item $g(x) = x_1^2$ \hfill (quadratic)
+  \item $g(x) = \sin(x_1)$ \hfill (trigonometric)
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Key idea:} Even though $x$ evolves nonlinearly, $g(x)$ may evolve \emph{linearly} if we choose $g$ correctly.
+\end{frame}
+
+\begin{frame}{Koopman Operator — Definition}
+For a nonlinear discrete-time system $x_{k+1} = F(x_k)$, the \textbf{Koopman operator} $\mathcal{K}$ is defined as:
+\[
+  \boxed{(\mathcal{K}g)(x) = g(F(x)) = g(x_{k+1})}
+\]
+
+\vspace{0.3cm}
+$\mathcal{K}$ maps any observable $g$ to its value one time-step in the future.
+
+\vspace{0.4cm}
+\textbf{Key property:} Even if $F$ is nonlinear,
+\[
+  \mathcal{K}(ag_1 + bg_2) = a\mathcal{K}g_1 + b\mathcal{K}g_2
+\]
+The Koopman operator is \textbf{always linear} — at the cost of acting on an infinite-dimensional function space.
+\end{frame}
+
+\begin{frame}{Infinite-Dimensional Nature}
+The Koopman operator acts on the full space of observables $\mathcal{G}$.
+
+\vspace{0.3cm}
+This space is \textbf{infinite-dimensional} — for any nonlinear system, closure forces you to keep adding new functions to the dictionary (see later slides).
+
+\vspace{0.5cm}
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+ & \textbf{State-space view} & \textbf{Koopman view} \\
+\midrule
+Space & $\mathbb{R}^n$ (finite) & $\mathcal{G}$ (infinite) \\
+Dynamics & Nonlinear $F$ & Linear $\mathcal{K}$ \\
+Analysis tools & Limited & Full linear algebra \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.4cm}
+In practice: choose a \textbf{finite dictionary} $\Psi(x) \in \mathbb{R}^N$ and approximate $\mathcal{K}$ on that subspace using data.
+\end{frame}
+
+\begin{frame}{Need for Koopman Operator}
+\textbf{We saw:} Real-world systems are nonlinear. Nonlinear systems are difficult to analyze.
+
+\vspace{0.2cm}
+\textbf{Linear systems are easy} because we can use:
+\begin{itemize}
+  \item Eigenvalues and spectral theory
+  \item Stability tools (Routh–Hurwitz, Lyapunov)
+  \item Matrix methods (LQR, Kalman filter)
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{The Problem:} We need linear tools for easy computation but the system is nonlinear.
+
+\vspace{0.4cm}
+\textbf{The Idea:} Instead of making the system linear in \emph{state space}, we make it linear in \emph{function space}.
+\[
+  \underbrace{\dot{x} = f(x)}_{\text{nonlinear in } \mathbb{R}^n}
+  \;\longrightarrow\;
+  \underbrace{\dot{\Psi} = \mathcal{K}\Psi}_{\text{linear in } \mathcal{G}}
+\]
+\end{frame}
+
+% ============================================================
+%  SECTION 3 — PENDULUM AND JUICE ANALOGY
+% ============================================================
+
+\begin{frame}{Jupiter Icy Moon Explorer (JUICE)}
+We consider data collected by the JUICE mission and decide whether the moons of Jupiter contain oceans.
+
+\vspace{0.3cm}
+\textbf{The Core Analogy: Tidal Response of Icy Moons}
+
+\vspace{0.4cm}
+\textbf{The Pendulum:}
+\begin{itemize}
+  \item \textbf{System:} A mass on a string (or rod)
+  \item \textbf{Forcing:} An external push at a regular interval
+  \item \textbf{Observable:} The amplitude of the swing
+  \item \textbf{Inference:} A shorter (stiffer) pendulum has a smaller swing for the same push
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Core Analogy — JUICE Tidal Response}
+\textbf{The JUICE Explorer:}
+\begin{itemize}
+  \item \textbf{System:} The entire icy moon (Europa, Ganymede, Callisto)
+  \item \textbf{Forcing:} Jupiter's periodic gravitational pull
+  \item \textbf{Observable:} Amplitude of the tidal bulge ($\sim$1 m vs $\sim$30 m)
+  \item \textbf{Inference:} Small bulge $\Rightarrow$ solid moon; large bulge $\Rightarrow$ subsurface ocean present
+\end{itemize}
+
+\vspace{0.4cm}
+\begin{block}{Wu et al.}
+``Since a planetary body with internal fluid deforms more than an otherwise solid body, tidal measurements offer exciting opportunities to detect the oceans.''
+\end{block}
+\end{frame}
+
+\begin{frame}{General Nonlinear Dynamical System}
+A nonlinear dynamical system is written as:
+\[
+  \frac{dx}{dt} = f(x), \quad x \in \mathbb{R}^n
+\]
+
+\vspace{0.3cm}
+For discrete-time dynamics:
+\[
+  x_{k+1} = F(x_k)
+\]
+where $F : \mathbb{R}^n \to \mathbb{R}^n$ represents the system evolution map.
+\end{frame}
+
+\begin{frame}{Nonlinear Pendulum Model}
+The nonlinear pendulum is analogous to tidal oscillations on Jupiter's icy moons.
+
+\vspace{0.4cm}
+The nonlinear pendulum equation:
+\begin{equation}
+  \ddot{\theta} + \frac{g}{L}\sin(\theta) = 0
+\end{equation}
+
+\begin{itemize}
+  \item $\theta$ = pendulum angle
+  \item $g$ = gravitational acceleration
+  \item $L$ = pendulum length
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{Why nonlinear?} The $\sin(\theta)$ term makes this globally nonlinear. The linearisation $\sin\theta \approx \theta$ is only valid near $\theta \approx 0$.
+\end{frame}
+
+\begin{frame}{First-Order Dynamical System}
+Define state variables $x_1 = \theta$, $x_2 = \dot{\theta}$. The system becomes:
+\begin{align}
+  \dot{x}_1 &= x_2 \\
+  \dot{x}_2 &= -\frac{g}{L}\sin(x_1)
+\end{align}
+
+Vector form: $\dot{x} = f(x)$
+
+\vspace{0.4cm}
+\textbf{The challenge:} The $\sin(x_1)$ term on the right-hand side means the state evolves nonlinearly. Any dictionary of observables that does not include $\sin(\theta)$ will fail to represent the dynamics exactly.
+\end{frame}
+
+\begin{frame}{Discrete Simulation}
+Using Euler integration for discrete data:
+\begin{equation}
+  x_{k+1} = x_k + \Delta t\, f(x_k)
+\end{equation}
+
+Simulation produces trajectory data:
+\[
+  x_1,\; x_2,\; x_3,\; \ldots,\; x_m
+\]
+
+These data snapshots are used for Koopman analysis via DMD and EDMD.
+\end{frame}
+
+% ============================================================
+%  SECTION 4 — OBSERVABLE SELECTION (NEW)
+% ============================================================
+
+\begin{frame}{Observable Selection — The Central Question}
+\begin{alertblock}{The key question}
+How do we decide which functions go into the observable dictionary $\Psi(x)$?
+\end{alertblock}
+
+\vspace{0.4cm}
+Any measurable function $g : \mathbb{R}^n \to \mathbb{R}$ is \emph{technically} an observable — but we need a \textbf{finite} subset that:
+
+\begin{enumerate}
+  \item Makes the Koopman approximation \emph{exact} (or near-exact)
+  \item Is rich enough to represent the dynamics
+  \item Does not contain redundant or ill-conditioned functions
+  \item Can reconstruct the original state $x$
+\end{enumerate}
+
+\vspace{0.3cm}
+There are \textbf{five selection criteria}, ranging from hard mathematical requirements to practical heuristics.
+\end{frame}
+
+\begin{frame}{Criterion 1 — Closure Under the Dynamics}
+\begin{block}{Closure property}
+A dictionary $\{\psi_1, \ldots, \psi_N\}$ is \textbf{closed} if, for each $i$:
+\[
+  \frac{d}{dt}\psi_i(x) = \sum_{j=1}^{N} K_{ij}\,\psi_j(x)
+\]
+i.e., the time-derivative of every observable stays inside the dictionary.
+\end{block}
+
+\vspace{0.4cm}
+\textbf{Why closure is not optional:}
+
+If $\frac{d}{dt}\psi_i$ produces a term \emph{outside} the dictionary, no finite matrix $K$ can satisfy the Koopman equation exactly. The equation $K\Psi(x) = \Psi(F(x))$ becomes structurally impossible.
+
+\vspace{0.3cm}
+EDMD finds the \emph{least-squares} $K$ — but structural mismatch cannot be fixed by more data.
+\end{frame}
+
+\begin{frame}{Closure — What Goes Wrong Without It}
+\textbf{Example:} Take only $\Psi(x) = [\theta,\; \dot{\theta}]^\top$ for the pendulum.
+
+\vspace{0.3cm}
+The Koopman equation requires:
+\[
+  K \begin{bmatrix}\theta \\ \dot{\theta}\end{bmatrix}
+  = \begin{bmatrix}\dot{\theta} \\ -\tfrac{g}{L}\sin\theta\end{bmatrix}
+\]
+
+\vspace{0.2cm}
+The term $-\tfrac{g}{L}\sin\theta$ \textcolor{koopcoral}{\textbf{cannot}} be written as any linear combination of $\{\theta, \dot{\theta}\}$.
+
+\vspace{0.3cm}
+$\Rightarrow$ No $2\times 2$ matrix $K$ satisfies this. The approximation:
+\begin{itemize}
+  \item Works near $\theta \approx 0$ (where $\sin\theta \approx \theta$)
+  \item \textcolor{koopcoral}{Fails for large angles — always, regardless of how much data you collect}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Closure — The Chain of Forced Terms}
+Applying the closure test to the pendulum iteratively:
+
+\vspace{0.3cm}
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lll}
+\toprule
+\textbf{Observable} $\psi_i$ & $\dfrac{d}{dt}\psi_i$ & \textbf{New term forced?} \\
+\midrule
+$\theta$ & $\dot{\theta}$ & $\Rightarrow$ add $\dot{\theta}$ \\
+$\dot{\theta}$ & $-\tfrac{g}{L}\sin\theta$ & $\Rightarrow$ add $\sin\theta$ \\
+$\sin\theta$ & $\cos\theta\cdot\dot{\theta}$ & $\Rightarrow$ add $\cos\theta$ \\
+$\cos\theta$ & $-\sin\theta\cdot\dot{\theta}$ & already in dictionary \checkmark \\
+$\dot{\theta}^2$ & $-2\tfrac{g}{L}\dot{\theta}\sin\theta$ & already in dictionary \checkmark \\
+$\mathcal{H}$ (Hamiltonian) & $0$ & \textcolor{koopgreen}{\textbf{zero leakage}} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\vspace{0.3cm}
+\textbf{This is why} $\sin\theta$, $\cos\theta$, and the energy $\mathcal{H}$ appear in the dictionary — the closure test forces them.
+\end{frame}
+
+\begin{frame}{Criterion 2 — Physical and Structural Insight}
+Before running any algorithm, ask: \emph{what are the natural coordinates this system wants to use?}
+
+\vspace{0.4cm}
+\textbf{General principles:}
+\begin{itemize}
+  \item \textbf{Include all nonlinear terms from the EOM directly} \\
+        $\sin\theta$ appears in $\ddot{\theta} = -\tfrac{g}{L}\sin\theta$ $\Rightarrow$ include it
+  \item \textbf{Include conserved quantities} \\
+        Any $C(x)$ with $\dot{C} = 0$ is a Koopman eigenfunction with $\lambda = 0$
+  \item \textbf{Include iterated derivatives} \\
+        $\tfrac{d}{dt}\sin\theta = \cos\theta\cdot\dot{\theta}$, so include $\cos\theta$
+\end{itemize}
+
+\vspace{0.4cm}
+\textbf{Common dictionary families:}
+\begin{itemize}
+  \item Monomials up to degree $d$: $\{x_1, x_2, x_1^2, x_1 x_2, \ldots\}$
+  \item Trigonometric: $\{\sin(k\theta), \cos(k\theta)\}$ — natural for oscillatory systems
+  \item Radial basis functions: $\exp(-\|x - c_i\|^2/\sigma^2)$
+  \item Physics-informed: terms directly from the equations of motion
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Criterion 3 — The Koopman Eigenfunction Condition}
+\begin{block}{Eigenfunction equation (continuous time)}
+A function $\varphi : \mathbb{R}^n \to \mathbb{C}$ is a Koopman eigenfunction with eigenvalue $\lambda$ if:
+\[
+  \nabla\varphi(x)^\top f(x) = \lambda\,\varphi(x)
+\]
+\end{block}
+
+\vspace{0.3cm}
+\textbf{Why eigenfunctions are the ideal observables:}
+
+Along any trajectory $x(t)$:
+\[
+  \varphi(x(t)) = e^{\lambda t}\,\varphi(x(0))
+\]
+
+Each eigenfunction evolves as a \textbf{pure exponential} — independently of all other observables.
+
+\vspace{0.3cm}
+When the dictionary consists of eigenfunctions, $K$ becomes \textbf{diagonal}:
+\[
+  K = \mathrm{diag}(\lambda_1, \lambda_2, \ldots, \lambda_N)
+\]
+The nonlinear system fully decouples into independent modes.
+\end{frame}
+
+\begin{frame}{Why Eigenfunctions Make $K$ Diagonal}
+\textbf{Arbitrary closed dictionary} $\Rightarrow$ $K$ is a dense coupled matrix:
+\[
+  K = \begin{bmatrix} k_{11} & k_{12} & \cdots \\ k_{21} & k_{22} & \cdots \\ \vdots & & \ddots \end{bmatrix}
+  \qquad \text{(every } \psi_i \text{ depends on every } \psi_j\text{)}
+\]
+
+\vspace{0.3cm}
+\textbf{Eigenfunction dictionary} $\Rightarrow$ $K$ is diagonal:
+\[
+  K = \begin{bmatrix} \lambda_1 & 0 & \cdots \\ 0 & \lambda_2 & \cdots \\ \vdots & & \ddots \end{bmatrix}
+  \qquad \varphi_i(x(t)) = e^{\lambda_i t}\,\varphi_i(x_0)
+\]
+
+\vspace{0.4cm}
+Eigenvalues directly encode the system's behaviour:
+\begin{itemize}
+  \item $\mathrm{Re}(\lambda) < 0$: mode decays (stable)
+  \item $\mathrm{Im}(\lambda) \neq 0$: mode oscillates at that frequency
+  \item $\lambda = 0$: mode is conserved $\Rightarrow$ \textbf{Hamiltonian!}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Criterion 4 — Richness and Non-Redundancy}
+\textbf{Richness:} The dictionary must span the space where the Koopman eigenfunctions live.
+
+\vspace{0.3cm}
+Too few functions $\Rightarrow$ high approximation error.
+
+\vspace{0.4cm}
+\textbf{Non-redundancy:} If two observables are nearly linearly dependent (e.g., $\sin^2\theta$ and $1 - \cos^2\theta$), the data matrix $X$ becomes ill-conditioned.
+
+\vspace{0.3cm}
+\textbf{How to check:} Compute the SVD of the data matrix $X = USV^\top$.
+\begin{itemize}
+  \item Near-zero singular values $\Rightarrow$ redundant observables, truncate them
+  \item Condition number $\kappa(X) = \sigma_{\max}/\sigma_{\min}$ should be small
+\end{itemize}
+
+\vspace{0.3cm}
+This is precisely why we use SVD in the EDMD computation.
+\end{frame}
+
+\begin{frame}{Criterion 5 — State Reconstruction Requirement}
+\begin{block}{Practical requirement for control}
+The dictionary must include (or be able to reconstruct) the original state $x$.
+\end{block}
+
+\vspace{0.3cm}
+Standard form:
+\[
+  \Psi(x) = \begin{bmatrix} x \\ \psi_1(x) \\ \psi_2(x) \\ \vdots \end{bmatrix}
+  \in \mathbb{R}^N, \quad N \gg n
+\]
+
+Always include the identity observables $\{x_1, x_2, \ldots, x_n\}$ as the first entries.
+
+\vspace{0.4cm}
+\textbf{Why:} Without this, you can propagate $\Psi(x_k)$ forward in time but cannot decode the predictions back into physical coordinates.
+
+\vspace{0.3cm}
+\textbf{Pendulum dictionary in full:}
+\[
+  \Psi(x) = \bigl[\theta,\;\dot{\theta},\;\sin\theta,\;\cos\theta,\;\dot{\theta}^2,\;\mathcal{H}\bigr]^\top \in \mathbb{R}^6
+\]
+\end{frame}
+
+\begin{frame}{Summary of Observable Selection Criteria}
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{clp{5cm}}
+\toprule
+\textbf{\#} & \textbf{Criterion} & \textbf{What it ensures} \\
+\midrule
+1 & Closure & $K$ is exactly (not approximately) correct \\
+2 & Physics/EOM insight & No important dynamics are missed \\
+3 & Eigenfunction property & $K$ becomes diagonal; modes decouple \\
+4 & Richness \& non-redundancy & Well-conditioned EDMD computation \\
+5 & State reconstruction & Predictions can be decoded to real coordinates \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{frame}
+
+% ============================================================
+%  SECTION 5 — WHY CLOSURE, EIGENFUNCTIONS, HAMILTONIAN MATTER
+% ============================================================
+
+\begin{frame}{Why Closure Is Not Optional — Formal Statement}
+\begin{alertblock}{Without closure}
+There exists no finite matrix $K \in \mathbb{R}^{N \times N}$ such that
+\[
+  K\,\Psi(x_{k}) = \Psi(x_{k+1}) \quad \forall\; x
+\]
+More data does not fix a structural mismatch. The error is irreducible.
+\end{alertblock}
+
+\vspace{0.4cm}
+\begin{block}{With closure}
+The Koopman equation holds \emph{exactly} on the lifted space:
+\[
+  \Psi(x_{k+1}) = K\,\Psi(x_k)
+\]
+The nonlinear system has been exactly embedded in a linear dynamical system.
+All standard linear tools (LQR, Kalman, pole placement) now apply.
+\end{block}
+\end{frame}
+
+\begin{frame}{Why Eigenfunctions Specifically — Not Just Any Closed Set}
+Closure gives you an exact $K$, but $K$ may still be a dense coupled matrix.
+
+\vspace{0.3cm}
+\textbf{A dense $K$ means:} every observable influences every other. Modes cannot be separated. Analysis is complex.
+
+\vspace{0.4cm}
+Eigenfunctions go further — they diagonalise $K$:
+\[
+  \varphi_i(x(t)) = e^{\lambda_i t}\,\varphi_i(x_0), \quad i = 1, 2, \ldots, N
+\]
+
+\begin{itemize}
+  \item Each mode evolves \textbf{independently}
+  \item Stability of mode $i$ is read directly from $\lambda_i$ — no matrix computation needed
+  \item System reconstruction becomes a simple superposition:
+\[
+  g(x(t)) = \sum_i a_i\,e^{\lambda_i t}\,\varphi_i(x_0)
+\]
+  \item This is the nonlinear analogue of \textbf{Fourier decomposition}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The Hamiltonian as a Koopman Eigenfunction}
+\textbf{Energy of the pendulum:}
+\[
+  \mathcal{H} = \underbrace{\frac{1}{2}mL^2\dot{\theta}^2}_{\text{kinetic}}
+               + \underbrace{mgL(1-\cos\theta)}_{\text{potential}}
+\]
+
+\vspace{0.3cm}
+\textbf{Verification — apply the eigenfunction PDE:}
+\[
+  \nabla\mathcal{H}^\top f(x)
+  = \dot{\theta}\frac{\partial \mathcal{H}}{\partial\theta}
+    + \ddot{\theta}\frac{\partial\mathcal{H}}{\partial\dot{\theta}}
+  = \dot{\theta}\cdot mgL\sin\theta + \ddot{\theta}\cdot mL^2\dot{\theta}
+\]
+
+Substituting $\ddot{\theta} = -\tfrac{g}{L}\sin\theta$:
+\[
+  = \dot{\theta}\cdot mgL\sin\theta - \frac{g}{L}\sin\theta\cdot mL^2\dot{\theta} = 0
+\]
+
+\[
+  \boxed{\nabla\mathcal{H}^\top f(x) = 0 = \lambda\,\mathcal{H} \implies \lambda = 0}
+\]
+
+The Hamiltonian is an eigenfunction with \textbf{eigenvalue exactly zero}.
+\end{frame}
+
+\begin{frame}{Significance of $\lambda = 0$ — Conservation as Eigensystem}
+\begin{block}{General result}
+For any conservative mechanical system, any conserved quantity $C(x)$ with $\dot{C} = 0$ is a Koopman eigenfunction with $\lambda = 0$.
+\end{block}
+
+\vspace{0.3cm}
+\textbf{Physical meaning:}
+\begin{itemize}
+  \item $e^{\lambda t} = e^{0} = 1$ — the eigenfunction does not grow or decay
+  \item The observable $\mathcal{H}(x(t)) = \mathcal{H}(x_0)$ for all $t$ — energy is conserved
+  \item $\mathcal{H}$ has \textbf{zero leakage} — its time-derivative produces no new terms outside the dictionary
+\end{itemize}
+
+\vspace{0.4cm}
+\textbf{Closure perspective:} $\mathcal{H}$ is the only function in the pendulum dictionary that is \emph{exactly closed by itself}. It requires no additional observables to complete. This is what makes it the most powerful single observable.
+\end{frame}
+
+\begin{frame}{Why the Hamiltonian — Three Reasons}
+\begin{enumerate}
+  \item \textbf{It always exists for mechanical systems.}\\
+        Guaranteed by Euler--Lagrange equations. No search required.
+
+  \vspace{0.4cm}
+  \item \textbf{It captures the system's energy geometry.}\\
+        The level sets $\mathcal{H}(x) = c$ are the invariant manifolds — precisely the curves in the phase portrait. Measuring $\mathcal{H}$ tells you which energy level set the system occupies.
+
+  \vspace{0.4cm}
+  \item \textbf{It directly enables optimal control.}\\
+        Define the Hamiltonian tracking error:
+        \[
+          e_{\mathcal{H}} = \mathcal{H}(x) - \mathcal{H}_d(x_d)
+        \]
+        Because $\lambda = 0$, the error dynamics are:
+        \[
+          \dot{e}_{\mathcal{H}} = \underbrace{0 \cdot e_{\mathcal{H}}}_{\text{vanishes}} + G_{\mathcal{H}}(x)\,u
+        \]
+        A 12-dimensional matrix Riccati equation reduces to a \textbf{scalar Riccati equation}.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{The Three Levels of Koopman Theory}
+
+\begin{block}{Level 1 — Observables give linearity}
+Lift $x$ into observable space. Dynamics become linear in $\mathcal{G}$. Requires closure for exactness.
+\end{block}
+
+\vspace{0.2cm}
+\begin{block}{Level 2 — Eigenfunctions give decoupling}
+Choose observables that are eigenfunctions. $K$ becomes diagonal. Nonlinear system decomposes into independent exponential modes. This is the nonlinear Fourier decomposition.
+\end{block}
+
+\vspace{0.2cm}
+\begin{block}{Level 3 — Hamiltonian gives physical meaning and control}
+$\mathcal{H}$ is an eigenfunction guaranteed by physics ($\lambda = 0$). Captures energy geometry. Reduces multivariable optimal control to a scalar problem via KRONIC/SDRE.
+\end{block}
+
+\vspace{0.2cm}
+\begin{center}
+\textbf{Payoff:} Nonlinear system $\;\longrightarrow\;$ scalar optimal control problem.
+\end{center}
+\end{frame}
+
+% ============================================================
+%  SECTION 6 — DATA-DRIVEN COMPUTATION
+% ============================================================
+
+\begin{frame}{Observable Space}
+Instead of the state $x$, we define observable functions:
+\begin{equation}
+  \Psi(x) =
+  \begin{bmatrix}
+    \theta \\ \dot{\theta} \\ \sin(\theta) \\ \cos(\theta) \\ \dot{\theta}^2
+  \end{bmatrix}
+  \in \mathbb{R}^5
+\end{equation}
+
+This \textbf{lifts} the system from the 2D state space to a 5D observable space.
+
+\vspace{0.3cm}
+Each entry was forced into the dictionary by the closure test. The state variables $(\theta, \dot{\theta})$ are included to satisfy Criterion~5.
+\end{frame}
+
+\begin{frame}{Data Matrices}
+Construct snapshot matrices from trajectory data $\{x_k\}_{k=1}^m$:
+\begin{equation}
+  X =
+  \begin{bmatrix}
+    | & | &  & | \\
+    \Psi(x_1) & \Psi(x_2) & \cdots & \Psi(x_{m-1}) \\
+    | & | &  & |
+  \end{bmatrix}
+  \in \mathbb{R}^{N \times (m-1)}
+\end{equation}
+\begin{equation}
+  Y =
+  \begin{bmatrix}
+    | & | &  & | \\
+    \Psi(x_2) & \Psi(x_3) & \cdots & \Psi(x_m) \\
+    | & | &  & |
+  \end{bmatrix}
+  \in \mathbb{R}^{N \times (m-1)}
+\end{equation}
+
+$Y$ contains the one-step-ahead observables corresponding to $X$.
+\end{frame}
+
+\begin{frame}{Least-Squares Approximation}
+We seek $K$ such that:
+\begin{equation}
+  Y \approx KX
+\end{equation}
+
+\textbf{Solution via Moore--Penrose pseudoinverse:}
+\begin{equation}
+  K = YX^{\dagger}
+\end{equation}
+
+This minimises $\|Y - KX\|_F^2$ over all matrices $K$.
+
+\vspace{0.4cm}
+\textbf{Interpretation:} $K$ is the best linear map (in the least-squares sense) that propagates the observable vector $\Psi(x_k)$ to $\Psi(x_{k+1})$.
+
+\vspace{0.3cm}
+If the dictionary is closed, this is \emph{exact}. If not, it is the best possible approximation within the chosen subspace.
+\end{frame}
+
+\begin{frame}{Singular Value Decomposition}
+To compute the pseudoinverse numerically:
+\begin{equation}
+  X = U S V^\top
+\end{equation}
+\begin{equation}
+  X^{\dagger} = V S^{-1} U^\top
+\end{equation}
+
+\vspace{0.3cm}
+\textbf{Benefits of SVD:}
+\begin{itemize}
+  \item Improves numerical stability
+  \item Near-zero singular values $\Rightarrow$ redundant observables (Criterion~4)
+  \item Truncate at rank $r$: keep only the $r$ largest singular values
+\end{itemize}
+
+\vspace{0.3cm}
+The rank $r$ is a model-order choice — balancing approximation quality against overfitting.
+\end{frame}
+
+\begin{frame}{Dynamic Mode Decomposition (DMD)}
+\textbf{Special case:} DMD assumes the observables are the state itself:
+\begin{equation}
+  \Psi(x) = x
+\end{equation}
+
+The system becomes:
+\begin{equation}
+  x_{k+1} = Ax_k, \quad A = YX^{\dagger}
+\end{equation}
+
+\vspace{0.3cm}
+\textbf{Limitation:} For nonlinear systems, the identity dictionary has no closure unless the system is linear. DMD finds the best linear model in the original coordinates.
+
+\vspace{0.3cm}
+\textbf{When to use DMD:} For systems that are nearly linear, or as a first-pass analysis before constructing a richer EDMD dictionary.
+\end{frame}
+
+\begin{frame}{Koopman Eigenvalues}
+Solve the eigenvalue problem:
+\begin{equation}
+  K\,w = \lambda\,w
+\end{equation}
+
+\textbf{Interpretation of eigenvalues $\lambda \in \mathbb{C}$:}
+\begin{itemize}
+  \item $\mathrm{Re}(\lambda) < 0$: mode decays exponentially $\Rightarrow$ \textcolor{koopgreen}{stable}
+  \item $\mathrm{Re}(\lambda) > 0$: mode grows $\Rightarrow$ \textcolor{koopcoral}{unstable}
+  \item $\mathrm{Im}(\lambda) \neq 0$: mode oscillates at frequency $\omega = \mathrm{Im}(\lambda)$
+  \item $\lambda = 0$: mode is conserved $\Rightarrow$ corresponds to a physical invariant
+\end{itemize}
+
+\vspace{0.3cm}
+\textbf{For the pendulum:} eigenvalues appear as complex conjugate pairs $\lambda_{1,2} = \pm j\omega_0$ reflecting the oscillatory nature. The eigenvalue near $\lambda = 0$ corresponds to the energy $\mathcal{H}$.
+\end{frame}
+
+\begin{frame}{Koopman Modes}
+Koopman modes are computed as:
+\begin{equation}
+  \Phi = Y V S^{-1} W
+\end{equation}
+where $W$ is the matrix of eigenvectors of $K$.
+
+\vspace{0.3cm}
+Each column of $\Phi$ represents a \textbf{dynamic mode} — a spatial pattern of the observable space associated with a particular eigenvalue.
+
+\vspace{0.4cm}
+\textbf{Physical interpretation:} Koopman modes show how each frequency component ($\lambda_i$) is distributed across the observables. For the pendulum, the dominant mode pair captures the oscillation pattern of $\theta$ and $\dot{\theta}$ together.
+\end{frame}
+
+\begin{frame}{System Reconstruction}
+The system state can be reconstructed as:
+\begin{equation}
+  x(t) = \sum_{i=1}^{r} b_i\,\phi_i\,e^{\lambda_i t}
+\end{equation}
+where:
+\begin{itemize}
+  \item $\phi_i$ = Koopman modes
+  \item $\lambda_i$ = Koopman eigenvalues
+  \item $b_i$ = initial amplitude coefficients
+\end{itemize}
+
+\vspace{0.3cm}
+This is the Koopman spectral decomposition — the nonlinear analogue of a Fourier series. The nonlinear trajectory is expressed as a \textbf{linear combination of exponential modes}, each evolving independently.
+\end{frame}
+
+\begin{frame}{Extended Dynamic Mode Decomposition (EDMD)}
+For nonlinear systems, lift the state using a rich observable dictionary:
+\[
+  \Psi(x) = \bigl[\theta,\;\dot{\theta},\;\sin\theta,\;\cos\theta,\;\dot{\theta}^2\bigr]^\top
+\]
+
+Construct lifted data matrices $\Psi(X)$ and $\Psi(X')$. The Koopman approximation:
+\[
+  K = \Psi(X')\,\Psi(X)^{\dagger}
+\]
+
+\vspace{0.3cm}
+\textbf{EDMD vs DMD:}
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lcc}
+\toprule
+ & \textbf{DMD} & \textbf{EDMD} \\
+\midrule
+Observable space & $\Psi(x) = x$ & $\Psi(x) \in \mathbb{R}^N$, $N \gg n$ \\
+Handles nonlinearity & Poorly & Well (with good dictionary) \\
+Closure & Rarely exact & Can be exact \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{frame}
+
+\begin{frame}{EDMD Matrix Formulation}
+Define the empirical Gram matrices:
+\[
+  G = \frac{1}{M}\sum_{k=1}^{M}\Psi(x_k)\Psi(x_k)^\top \in \mathbb{R}^{N\times N}
+\]
+\[
+  A = \frac{1}{M}\sum_{k=1}^{M}\Psi(x_k)\Psi(x_{k+1})^\top \in \mathbb{R}^{N\times N}
+\]
+
+The EDMD solution:
+\[
+  K = G^{-1}A
+\]
+
+\vspace{0.3cm}
+$G$ measures the ``spread'' of the observables over the data. $A$ measures how the observables correlate between consecutive steps.
+\end{frame}
+
+\begin{frame}{Koopman Eigenfunctions from EDMD}
+Solve the eigenvalue problem for $K$:
+\[
+  K\xi = \lambda\xi
+\]
+
+The corresponding \textbf{Koopman eigenfunction} evaluated at any state $x$:
+\[
+  \varphi(x) = \xi^\top\Psi(x)
+\]
+
+\vspace{0.3cm}
+\textbf{Verification:}
+\[
+  \varphi(F(x)) = \xi^\top\Psi(F(x)) \approx \xi^\top K\Psi(x) = \lambda\,\xi^\top\Psi(x) = \lambda\,\varphi(x)
+\]
+
+\vspace{0.3cm}
+These eigenfunctions describe the \textbf{coherent patterns} of the nonlinear dynamics — the coordinates in which the system looks linear.
+\end{frame}
+
+% ============================================================
+%  SECTION 7 — MEANING OF EIGENVALUES AND EIGENFUNCTIONS
+% ============================================================
+
+\begin{frame}{Meaning of Koopman Eigenvalues}
+\textbf{Koopman eigenvalues} represent the fundamental temporal dynamics.
+
+\vspace{0.3cm}
+They indicate intrinsic oscillation frequencies, growth, or decay rates globally — not just near an equilibrium.
+
+\vspace{0.4cm}
+\textbf{In the context of tidal oscillations (JUICE mission):}
+\begin{itemize}
+  \item Eigenvalues correspond to the \textbf{dominant tidal forcing frequencies} from Jupiter's gravitational pull
+  \item Additional eigenvalues indicate more complex dynamics such as coupling between the ice shell and a subsurface ocean
+  \item A purely solid moon $\Rightarrow$ few, simple eigenvalues
+  \item A moon with an ocean $\Rightarrow$ extra eigenvalues from the ocean–ice coupling modes
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Meaning of Koopman Eigenfunctions}
+\textbf{Koopman eigenfunctions} describe the \textbf{spatial structure} of the dynamics in the state space.
+
+\vspace{0.3cm}
+They act as special coordinates that transform nonlinear dynamics into linear exponential evolution:
+\[
+  \varphi_i(x(t)) = e^{\lambda_i t}\,\varphi_i(x_0)
+\]
+
+\vspace{0.3cm}
+\textbf{Physically:} They capture coherent patterns of motion or deformation.
+
+\vspace{0.4cm}
+\textbf{For icy moons:}
+\begin{itemize}
+  \item Eigenfunctions represent patterns of tidal deformation across the ice shell
+  \item Help identify hidden dynamical structures such as resonance patterns or ocean--ice interactions
+  \item The eigenfunction with $\lambda \approx 0$ corresponds to the slowly varying energy of the system
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Spectral Interpretation}
+The nonlinear system dynamics can be expressed as:
+\[
+  g(x_k) = \sum_i \varphi_i(x_0)\,e^{\lambda_i k}
+\]
+
+Nonlinear dynamics are represented as a \textbf{linear combination of exponential modes}.
+
+\vspace{0.5cm}
+\textbf{Analogy with Fourier analysis:}
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lcc}
+\toprule
+ & \textbf{Fourier (linear PDEs)} & \textbf{Koopman (nonlinear ODEs)} \\
+\midrule
+Basis functions & $e^{j\omega t}$ (sinusoids) & $e^{\lambda_i t}$ (Koopman modes) \\
+Decomposition & Frequency spectrum & Eigenvalue spectrum \\
+Coordinates & Frequency domain & Eigenfunction coordinates \\
+Linearity & Always exact & Exact when closed \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{frame}
+
+% ============================================================
+%  SECTION 8 — CONCLUSION
+% ============================================================
+
+\begin{frame}{Conclusion}
+\begin{itemize}
+  \item Koopman operator provides an \textbf{exact linear representation} of nonlinear systems in an infinite-dimensional function space.
+
+  \vspace{0.2cm}
+  \item \textbf{Observable selection} follows five criteria: closure, physical insight, eigenfunction property, richness, and state reconstruction.
+
+  \vspace{0.2cm}
+  \item \textbf{Closure} is not optional — without it, no finite $K$ exists that is structurally correct.
+
+  \vspace{0.2cm}
+  \item \textbf{Eigenfunctions} diagonalise $K$, decoupling the nonlinear system into independent exponential modes.
+
+  \vspace{0.2cm}
+  \item The \textbf{Hamiltonian} is an eigenfunction with $\lambda = 0$, guaranteed by physics, with zero leakage — the most powerful single observable for mechanical systems.
+
+  \vspace{0.2cm}
+  \item DMD and EDMD \textbf{approximate $\mathcal{K}$ from data}, enabling spectral analysis of nonlinear systems without knowing $f(x)$.
+\end{itemize}
+\end{frame}
+
+% ============================================================
+%  SECTION 9 — MATLAB SIMULATIONS
+% ============================================================
+
+\begin{frame}{Matlab Simulations of DMD}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{Screenshot_20260305_004040.png}
+  \caption{Nonlinear pendulum phase space}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Matlab Simulations of DMD}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{Screenshot_20260305_004121.png}
+  \caption{Pendulum angle vs time}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Matlab Simulations of DMD}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{Screenshot_20260305_004749.png}
+  \caption{Koopman eigenvalue spectrum (DMD)}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Matlab Simulations of DMD}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{Screenshot_20260305_004821.png}
+  \caption{True vs DMD reconstruction}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Matlab Simulations of Extended DMD}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{Screenshot_20260305_010413.png}
+  \caption{True vs EDMD reconstruction}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Matlab Simulations of Extended DMD}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{Screenshot_20260305_010402.png}
+  \caption{Koopman eigenvalue spectrum (EDMD)}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Matlab Simulations of Extended DMD}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{Screenshot_20260305_010349.png}
+  \caption{Example Koopman eigenfunction}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Matlab Simulations of Extended DMD}
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{Screenshot_20260305_010334.png}
+  \caption{Pendulum simulation animation}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Final Conclusion}
+Koopman operator theory provides a powerful framework for analysing nonlinear systems.
+
+\vspace{0.3cm}
+\begin{itemize}
+  \item Converts nonlinear dynamics into linear evolution in function space
+  \item Observable selection via closure, physics, and eigenfunction criteria
+  \item Enables global spectral analysis — not just near equilibrium
+  \item Useful in control (KRONIC, SDRE), fluid dynamics, robotics, and planetary science
+\end{itemize}
+
+\vspace{0.5cm}
+\begin{center}
+\large\textbf{One physics-derived scalar (the Hamiltonian) can replace}\\
+\textbf{an entire matrix optimal control problem.}
+\end{center}
+\end{frame}
+
+\end{document}
