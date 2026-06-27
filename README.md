@@ -246,6 +246,20 @@ This analogy demonstrates how observable-based analysis can infer properties tha
 
 ---
 
+## JUICE Mission Analogy
+
+The presentation uses the ESA JUICE mission as an intuitive analogy.
+
+The key idea:
+
+* External forcing excites a dynamical system.
+* Observable responses reveal hidden physical properties.
+* Large tidal responses can indicate subsurface oceans beneath icy moons.
+
+This analogy demonstrates how observable-based analysis can infer properties that are not directly measurable.
+
+---
+
 ## Aerospace Motivation
 
 One of the most exciting aspects of Koopman theory is its relevance to aerospace systems.
