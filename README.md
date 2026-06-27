@@ -23,6 +23,7 @@ The presentation was developed as part of a B.Tech technical seminar and investi
 * Closure properties of observable dictionaries
 * Data-driven system identification
 * Aerospace and planetary science applications
+* Analogus aproach for Jupiter Icy Moon Explorer(JUICE)
 
 ---
 
@@ -117,6 +118,7 @@ This viewpoint reveals nonlinear dynamics as combinations of simpler independent
 ## Pendulum Case Study
 
 To make the theory concrete, the project develops a complete nonlinear pendulum example.
+Then the non linear pendulum is considered that it is analogous to the observation of the patterns of the Icy moons of Jupiter - Europa. 
 
 ### Nonlinear Model
 
