@@ -58,7 +58,7 @@ title('Pendulum Angle vs Time')
 
 grid on
 
-%% DYNAMIC MODE DECOMPOSITION
+%% DYNAMIC MODE DECOMPOSITION considering only the X and Y
 
 X = x(:,1:end-1);
 Y = x(:,2:end);

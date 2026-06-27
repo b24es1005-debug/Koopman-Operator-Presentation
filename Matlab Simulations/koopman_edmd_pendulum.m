@@ -53,7 +53,7 @@ title('Pendulum Angle vs Time')
 grid on
 
 %% ------------------------------
-%% EXTENDED DYNAMIC MODE DECOMPOSITION
+%% EXTENDED DYNAMIC MODE DECOMPOSITION compared to DMD here we lift the space and then compute
 %% ------------------------------
 
 % observables (lifting)
